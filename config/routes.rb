@@ -1,7 +1,7 @@
 SampleApp::Application.routes.draw do
-
-  get "users/new"
-
+  #it endows our sample application with all the actions needed for a RESTful Users resource,5 along with a large number of named routes
+   resources :users
+  
    root to: 'static_pages#home'
    match '/help', to: 'static_pages#help'
   
