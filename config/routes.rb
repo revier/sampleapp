@@ -1,6 +1,7 @@
 SampleApp::Application.routes.draw do
   #it endows our sample application with all the actions needed for a RESTful Users resource,5 along with a large number of named routes
    resources :users
+   resources :sessions, only: [:new,:create,:destroy]
   
    root to: 'static_pages#home'
    match '/help', to: 'static_pages#help'
@@ -9,6 +10,9 @@ SampleApp::Application.routes.draw do
    match '/contact', to: 'static_pages#contact'
    
    match '/signup' , to: 'users#new'
+   
+   match '/signin',   to: 'sessions#new'
+   match '/signout',  to: 'sessins#destroy', via: :delete
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
