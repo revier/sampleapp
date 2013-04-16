@@ -23,23 +23,20 @@ describe "AuthenticationPages" do
       end
 
       it { should have_selector('title', text: user.name) }
-       
-       it { should have_link('Users',    href: users_path) }
-       
+      it { should have_link('Users',    href: users_path) }
+
       it { should have_link('Profile', href: user_path(user)) }
-      it { should have_link('Settings', href: edit_user_path(user)) }
       it { should have_link('Sign out', href: signout_path) }
-      it { should_not have_link('Sign in', href: signin_path) }
-
+      it { should_not have_link('Sign in', href: signin_path) }      
+      
       describe "followed by signout" do
-
         before { click_link "Sign out" }
         it { should have_link('Sign in') }
-
+      
       end
 
-    end
 
+    end
 
     describe "with invalid information" do
       before { click_button "Sign in" }
@@ -51,12 +48,13 @@ describe "AuthenticationPages" do
         before { click_link "Home" }
         it { should_not have_selector('div.alert.alert-error') }
       end
+
+
     end
 
 
 
   end
-
 
   describe "authorization" do
 
@@ -80,8 +78,23 @@ describe "AuthenticationPages" do
           it { should have_selector('title', text: 'Sign in') }
         end
 
-      end
-    end
+      end # user controller
+
+      describe "in the Microposts controller" do
+
+        describe "submitting to the create action" do
+          before { post microposts_path }
+          specify { response.should redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { response.should redirect_to(signin_path) }
+        end
+
+      end# microposts controller
+
+    end # fornon-signed-in users
 
     describe "as wrong user" do
       let(:user) { FactoryGirl.create(:user) }
@@ -95,6 +108,19 @@ describe "AuthenticationPages" do
 
       describe "submitting a PUT request to the Users#update action" do
         before { put user_path(wrong_user) }
+        specify { response.should redirect_to(root_path) }
+      end
+    end # wrong user
+
+
+    describe "as non-admin user" do
+      let(:user) { FactoryGirl.create(:user) }
+      let(:non_admin) { FactoryGirl.create(:user) }
+
+      before { sign_in non_admin }
+
+      describe "submitting a DELETE request to the Users#destroy action" do
+        before { delete user_path(user) }
         specify { response.should redirect_to(root_path) }
       end
     end
@@ -116,8 +142,26 @@ describe "AuthenticationPages" do
             page.should have_selector('title', text: 'Edit user')
           end
         end
-      end
 
-    end
+        describe "when signing in again" do
+          before do
+            delete signout_path
+            visit signin_path
+            fill_in "Email",    with: user.email
+            fill_in "Password", with: user.password
+            click_button "Sign in"
+          end
 
-  end
+          it "should render the default (profile) page" do
+            page.should have_selector('title', text: user.name)
+          end
+
+        end# signing in again
+
+      end# attempting to visit a protected page
+
+    end# non-signed- in users
+
+  end# authentication
+
+end
